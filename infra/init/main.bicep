@@ -12,7 +12,7 @@ module names 'resource-names.bicep' = {
   }
 }
 
-module managedIdentityDeployment 'managed-identities.bicep' = {
+module managedIdentityDeployment 'managed-identity.bicep' = {
   name: 'managed-identity-deployment'
   params: {
     location: location
@@ -28,7 +28,7 @@ module loggingDeployment 'logging.bicep' = {
   }
 }
 
-module keyVaultDeployment 'keyVault.bicep' = {
+module keyVaultDeployment 'key-vault.bicep' = {
   name: 'key-vault-deployment'
   params: {
     keyVaultName: names.outputs.keyVaultName
