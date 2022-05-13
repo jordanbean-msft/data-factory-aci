@@ -6,6 +6,8 @@ This repo shows how to use [Azure Container Instance](https://docs.microsoft.com
 
 ## Disclaimer
 
+**THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.**
+
 ## Prerequisites
 
 - [Docker Desktop for Windows](https://docs.docker.com/desktop/windows/install/)
@@ -83,13 +85,13 @@ docker push crdatafactoryaciusscdev.azurecr.io/demo-linux
 
 ### Build Windows container image locally & push to Azure Container Registry
 
-1.  Execute the Python script locally to ensure it runs
+1.  Execute the Python script locally to ensure it runs.
 
 ```shell
 python -m ./src/main
 ```
 
-1.  Build a Docker image locally
+1.  Build a Docker image locally.
 
 ```shell
 docker build -t demo-windows -f ./src/Dockerfile-windows ./src
@@ -133,9 +135,53 @@ az deployment group create -g rg-dataFactoryAci-ussc-dev --template-file ./infra
 
 ### Initialize the Logic App Connector
 
+The Azure Container Instance (ACI) connector must be initialized with credentials so it can start the Azure Container Instances as needed. You can authorize it to do this as your identity or a managed identity. In this example, we will authorize it with your ID.
+
+1.  Navigate to the [Azure portal](https://portal.azure.com) and navigate to your subscription & resource group.
+
+1.  Click on the `aci` API Connection resource.
+
+1.  Click on the `Edit API connection` button.
+
+1.  Click on the `Authorize` button, then `Save`.
+
+![aciAuthorize](.img/aciAuthorize.png)
+
 ## Review the container instance running in Azure
 
+1.  Navigate to the [Azure portal](https://portal.azure.com) and navigate to your subscription & resource group.
+
+1.  Click on one of the `Azure Container Instance` instances.
+
+1.  On the `Containers` tab, you can see that the container is now terminated (since it ran to completion).
+
+1.  Click on the `Logs` tab to see the logs the container generated as it ran. These should match the values that were output by the Python script when running locally.
+
+![aciLogs](.img/aciLogs.png)
+
+1.  Click on the `Properties` tab to see the container instance properties, including the environment variable that stores the storage account connection string that was retrieved from the Key Vault.
+
+![aciEnvironmentVariables.png](.img/aciEnvironmentVariables.png)
+
+## How to get the storage account connection string secret from the Key Vault into the Azure Container Instance
+
+We need the Python code running inside the Container Instance to be able to access the storage account connection string. We can get the storage account connection string secret from the KeyVault and store it in an environment variable. Normally, this would be done by using a managed identity that has access to the KeyVault, but Windows container instances can't use managed identity at this time (and it is in preview for Linux containers).
+
+Therefore, we can pull this secret at deployment time as part of the Azure Resource Manager deployment. ARM will pull the secret and store the value as an environment variable in the container instance.
+
 ## Review the Logic App
+
+1.  Navigate to the [Azure portal](https://portal.azure.com) and navigate to your subscription & resource group.
+
+1.  Click on the `Logic App` resource.
+
+1.  The first execution is likely to have failed because the `aci` connection was not initialized on initial deployment. Re-run the Logic App to ensure it runs. Click on the `Run Trigger->Run` button on the `Overview` blade.
+
+1.  Click on the most recent run on the `Runs history` tab on the `Overview` blade.
+
+![logicAppStart](.img/logicAppStart.png)
+
+This Logic App will run once per day and start the Azure Container Instance.
 
 ## Links
 

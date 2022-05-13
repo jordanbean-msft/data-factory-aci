@@ -25,7 +25,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' existing = {
   name: keyVaultName
 }
 
-module linuxContainerInstanceDeployment 'aci.bicep' = {
+module linuxContainerInstanceDeployment 'aci-linux.bicep' = {
   name: 'linux-container-instance-deployment'
   params: {
     containerInstanceName: names.outputs.linuxContainerInstanceName
@@ -43,7 +43,7 @@ module linuxContainerInstanceDeployment 'aci.bicep' = {
   }
 }
 
-module windowsContainerInstanceDeployment 'aci.bicep' = {
+module windowsContainerInstanceDeployment 'aci-windows.bicep' = {
   name: 'windows-container-instance-deployment'
   params: {
     containerInstanceName: names.outputs.windowsContainerInstanceName
