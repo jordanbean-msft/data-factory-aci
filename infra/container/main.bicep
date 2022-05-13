@@ -1,18 +1,18 @@
 param aciConnectionName string
+param appName string
 param containerRegistryName string
+param environment string
 param imageName string
 param imageVersion string
-param logAnalyticsWorkspaceName string
-param numberOfContainersToCreate int
-param appName string
-param environment string
-param region string
-param location string = resourceGroup().location
 param keyVaultName string
+param location string = resourceGroup().location
+param logAnalyticsWorkspaceName string
 param managedIdentityName string
-param storageAccountName string
-param storageAccountConnectionStringSecretName string
+param numberOfContainersToCreate int
 param osType string
+param region string
+param storageAccountConnectionStringSecretName string
+param storageAccountName string
 
 module names 'resource-names.bicep' = {
   name: 'resource-names'
@@ -23,6 +23,10 @@ module names 'resource-names.bicep' = {
   }
 }
 
+resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' existing = {
+  name: keyVaultName
+}
+
 module containerInstanceDeployment 'aci.bicep' = {
   name: 'container-instance-deployment'
   params: {
@@ -31,12 +35,11 @@ module containerInstanceDeployment 'aci.bicep' = {
     numberOfContainersToCreate: numberOfContainersToCreate
     imageName: imageName
     imageVersion: imageVersion
-    keyVaultName: keyVaultName
     location: location
     managedIdentityName: managedIdentityName
     osType: osType
-    storageAccountConnectionStringSecretName: storageAccountConnectionStringSecretName
     storageAccountName: storageAccountName
+    storageAccountConnectionStringSecret: keyVault.getSecret(storageAccountConnectionStringSecretName)
   }
 }
 

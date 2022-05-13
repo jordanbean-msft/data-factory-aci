@@ -59,7 +59,7 @@ resource logicApp 'Microsoft.Logic/workflows@2019-05-01' = {
           aci: {
             connectionId: aciConnection.id
             connectionName: 'aci'
-            id: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Web/locations/${uriComponent(resourceGroup().location)}/managedApis/aci'
+            id: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Web/locations/${uriComponent(location)}/managedApis/aci'
           }
         }
       }

@@ -7,8 +7,8 @@ param location string
 param containerInstanceName string
 param managedIdentityName string
 param osType string
-param keyVaultName string
-param storageAccountConnectionStringSecretName string
+@secure()
+param storageAccountConnectionStringSecret string
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
   name: storageAccountName
@@ -20,10 +20,6 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-06-01-pr
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2021-09-30-preview' existing = {
   name: managedIdentityName
-}
-
-resource storageAccountConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2021-10-01' existing = {
-  name: '${keyVaultName}/${storageAccountConnectionStringSecretName}'
 }
 
 resource containerInstance 'Microsoft.ContainerInstance/containerGroups@2021-03-01' = {
@@ -44,7 +40,7 @@ resource containerInstance 'Microsoft.ContainerInstance/containerGroups@2021-03-
           {
             name: 'AZURE_STORAGE_CONNECTION_STRING'
             //secureValue: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(resourceId('Microsoft.Storage/storageAccounts', storageAccount.name), '2019-06-01').keys[0].value}'
-            secureValue: storageAccountConnectionStringSecret.properties.value
+            secureValue: storageAccountConnectionStringSecret
           }
         ]
         resources: {

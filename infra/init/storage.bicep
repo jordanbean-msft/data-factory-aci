@@ -33,7 +33,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' existing = {
 }
 
 resource storageAccountConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2021-10-01' = {
-  name: storageAccountConnectionStringSecretName
+  name: '${keyVaultName}/${storageAccountConnectionStringSecretName}'
   properties: {
     value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
   }
