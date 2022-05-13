@@ -1,15 +1,13 @@
-param aciConnectionName string
 param appName string
 param containerRegistryName string
 param environment string
-param imageName string
-param imageVersion string
+param linuxContainerSettings object
+param windowsContainerSettings object
 param keyVaultName string
 param location string = resourceGroup().location
 param logAnalyticsWorkspaceName string
 param managedIdentityName string
 param numberOfContainersToCreate int
-param osType string
 param region string
 param storageAccountConnectionStringSecretName string
 param storageAccountName string
@@ -27,31 +25,60 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' existing = {
   name: keyVaultName
 }
 
-module containerInstanceDeployment 'aci.bicep' = {
-  name: 'container-instance-deployment'
+module linuxContainerInstanceDeployment 'aci.bicep' = {
+  name: 'linux-container-instance-deployment'
   params: {
-    containerInstanceName: names.outputs.containerInstanceName
+    containerInstanceName: names.outputs.linuxContainerInstanceName
     containerRegistryName: containerRegistryName
     numberOfContainersToCreate: numberOfContainersToCreate
-    imageName: imageName
-    imageVersion: imageVersion
+    imageName: linuxContainerSettings.imageName
+    imageVersion: linuxContainerSettings.imageVersion
     location: location
     managedIdentityName: managedIdentityName
-    osType: osType
+    osType: linuxContainerSettings.osType
     storageAccountName: storageAccountName
     storageAccountConnectionStringSecret: keyVault.getSecret(storageAccountConnectionStringSecretName)
+    aciConnectionName: names.outputs.aciConnectionName
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
   }
 }
 
-module logicAppDeployment 'logic.bicep' = {
-  name: 'logic-app-deployment'
+module windowsContainerInstanceDeployment 'aci.bicep' = {
+  name: 'windows-container-instance-deployment'
   params: {
-    containerInstanceName: containerInstanceDeployment.outputs.containerInstanceName
-    logicAppName: names.outputs.logicAppName
+    containerInstanceName: names.outputs.windowsContainerInstanceName
+    containerRegistryName: containerRegistryName
+    numberOfContainersToCreate: numberOfContainersToCreate
+    imageName: windowsContainerSettings.imageName
+    imageVersion: windowsContainerSettings.imageVersion
+    location: location
+    managedIdentityName: managedIdentityName
+    osType: windowsContainerSettings.osType
+    storageAccountName: storageAccountName
+    storageAccountConnectionStringSecret: keyVault.getSecret(storageAccountConnectionStringSecretName)
+    aciConnectionName: names.outputs.aciConnectionName
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
-    aciConnectionName: aciConnectionName
+  }
+}
+
+module linuxLogicAppDeployment 'logic.bicep' = {
+  name: 'linux-logic-app-deployment'
+  params: {
+    containerInstanceName: linuxContainerInstanceDeployment.outputs.containerInstanceName
+    logicAppName: names.outputs.linuxLogicAppName
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+    aciConnectionName: names.outputs.aciConnectionName
     location: location
   }
 }
 
-output containerInstanceName string = containerInstanceDeployment.outputs.containerInstanceName
+module windowsLogicAppDeployment 'logic.bicep' = {
+  name: 'windows-logic-app-deployment'
+  params: {
+    containerInstanceName: windowsContainerInstanceDeployment.outputs.containerInstanceName
+    logicAppName: names.outputs.windowsLogicAppName
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+    aciConnectionName: names.outputs.aciConnectionName
+    location: location
+  }
+}

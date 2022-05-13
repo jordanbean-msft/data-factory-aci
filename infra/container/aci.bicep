@@ -9,6 +9,8 @@ param managedIdentityName string
 param osType string
 @secure()
 param storageAccountConnectionStringSecret string
+param logAnalyticsWorkspaceName string
+param aciConnectionName string
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
   name: storageAccountName
@@ -20,6 +22,10 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-06-01-pr
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2021-09-30-preview' existing = {
   name: managedIdentityName
+}
+
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' existing = {
+  name: logAnalyticsWorkspaceName
 }
 
 resource containerInstance 'Microsoft.ContainerInstance/containerGroups@2021-03-01' = {
@@ -39,7 +45,6 @@ resource containerInstance 'Microsoft.ContainerInstance/containerGroups@2021-03-
         environmentVariables: [
           {
             name: 'AZURE_STORAGE_CONNECTION_STRING'
-            //secureValue: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(resourceId('Microsoft.Storage/storageAccounts', storageAccount.name), '2019-06-01').keys[0].value}'
             secureValue: storageAccountConnectionStringSecret
           }
         ]
@@ -60,17 +65,23 @@ resource containerInstance 'Microsoft.ContainerInstance/containerGroups@2021-03-
         password: listCredentials(containerRegistry.id, containerRegistry.apiVersion).passwords[0].value
       }
     ]
+    diagnostics: {
+      logAnalytics: {
+        workspaceId: reference(logAnalyticsWorkspace.id, logAnalyticsWorkspace.apiVersion).customerId
+        workspaceKey: listKeys(logAnalyticsWorkspace.id, logAnalyticsWorkspace.apiVersion).primarySharedKey
+      }
+    }
   }
 }
 
 resource aciConnection 'Microsoft.Web/connections@2016-06-01' = {
-  name: 'aci'
+  name: aciConnectionName
   location: location
   properties: {
     api: {
-      id: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Web/locations/${uriComponent(location)}/managedApis/aci'
+      id: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Web/locations/${uriComponent(location)}/managedApis/${aciConnectionName}'
     }
-    displayName: 'aci'
+    displayName: aciConnectionName
     parameterValues: {}
   }
 }
