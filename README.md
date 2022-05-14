@@ -58,6 +58,8 @@ az deployment group create -g rg-dataFactoryAci-ussc-dev --template-file ./infra
 python -m ./src/main
 ```
 
+1.  Make sure you have configured Docker Desktop for Windows to use **Linux** containers, not **Windows** containers. Right-click on the Docker Desktop icon in the system tray and select `Switch to Linux containers`.
+
 1.  Build a Docker image locally
 
 ```shell
@@ -90,6 +92,8 @@ docker push crdatafactoryaciusscdev.azurecr.io/demo-linux
 ```shell
 python -m ./src/main
 ```
+
+1.  Make sure you have configured Docker Desktop for Windows to use **Windows** containers, not **Linux** containers. Right-click on the Docker Desktop icon in the system tray and select `Switch to Windows containers`.
 
 1.  Build a Docker image locally.
 
