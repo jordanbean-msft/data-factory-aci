@@ -33,7 +33,7 @@ az deployment group create -g rg-dataFactoryAci-ussc-dev --template-file ./infra
 {
   "containerRegistryName": {
     "type": "String",
-    "value": "la-dataFactoryAci-ussc-dev"
+    "value": "crdatafactoryaciusscdev"
   },
   "keyVaultName": {
     "type": "String",
