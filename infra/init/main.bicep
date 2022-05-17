@@ -62,5 +62,5 @@ module containerRegistryDeployment 'acr.bicep' = {
 output managedIdentityName string = names.outputs.managedIdentityName
 output storageAccountName string = names.outputs.storageAccountName
 output keyVaultName string = names.outputs.keyVaultName
-output containerRegistryName string = names.outputs.logAnalyticsWorkspaceName
+output containerRegistryName string = names.outputs.containerRegistryName
 output logAnalyticsWorkspaceName string = names.outputs.managedIdentityName
